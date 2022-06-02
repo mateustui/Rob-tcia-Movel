@@ -9,6 +9,7 @@
    necessidade de clicar nos botões do CoppeliaSim
 """
 
+from re import T
 import vrep
 import time
 import sys
@@ -44,6 +45,7 @@ L = 0.28    # Distância entre-rodas
 def Controlar_Motores_Uniciclo(u,w):    
     wd=(2*u+w*L)/(2*R)
     we=(2*u-w*L)/(2*R)
+    print("we: %1.2f || wd: %1.2f" % (we, wd ))
     
     vrep.simxSetJointTargetVelocity(clientID,  leftMotorHandle, we, vrep.simx_opmode_streaming)
     vrep.simxSetJointTargetVelocity(clientID, rightMotorHandle, wd, vrep.simx_opmode_streaming)
@@ -70,15 +72,14 @@ def main():
     dt = 0.05   # Intervalo de integração
     controle = True
     Kp = 2.0 # Começar com Kp = 2.0 || Em seguida, testar Kp = 0.5
-    u0 = 1.5
+    u0 = 0.5
     #Loop de controle do robô
     while vrep.simxGetConnectionId(clientID) != -1:
         t0 = time.perf_counter()
-        
-        t += dt
-        
         xg, yg, phig = Obter_Posicao(TargetbodyHandle)     
         x, y, phi = Obter_Posicao(bodyHandle)
+        t += dt
+        
         
         ###################################################################
         #### Implementar Controlador Goal-To-Goal do Robô aqui     ########
@@ -105,7 +106,9 @@ def main():
         #### ##############################################################
         ###################################################################
         
-        print("xg: %1.2f  yg: %1.2f  phig: %1.2f || x : %1.2f  y : %1.2f  phi : %1.2f || rho: %1.2f Erro %1.2f||  Tempo de Simulação: %1.2f [seg]" % (xg, yg, phig, x, y, phi, rho, e, t ))
+        print("phid: %1.2f || x: %1.2f  y: %1.2f  phi: %1.2f || rho: %1.2f Erro: %1.2f" % (phid, x, y, phi, rho, e ))
+
+        
         
         
         vrep.simxSynchronousTrigger(clientID); # Trigger next simulation step (Blocking function call)
